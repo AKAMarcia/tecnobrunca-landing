@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useLanguage } from '../LanguageContext';
 import { FaLinkedin, FaGithub } from 'react-icons/fa';
 import { FaXTwitter } from 'react-icons/fa6';
-import { TextRoll } from './ui/text-roll';
+import { DynamicText } from './DynamicText';
 import { supabase } from '../lib/supabase';
 
 const Footer = () => {
@@ -25,7 +25,7 @@ const Footer = () => {
           const newLinks = { ...links };
           data.forEach(item => {
             if (item.key === 'linkedin_url' || item.key === 'twitter_url' || item.key === 'github_url') {
-              newLinks[item.key] = item.value || '#';
+              newLinks[item.key as keyof typeof links] = item.value || '#';
             }
           });
           setLinks(newLinks);
@@ -45,7 +45,7 @@ const Footer = () => {
           <div className="text-center md:text-left">
             <img src="/assets/images/navbar-logo.png" alt="TecnoBrunca Logo" className="h-10 mx-auto md:mx-0 mb-4 object-contain drop-shadow-sm dark:brightness-150 transition-all" />
             <p className="text-text-light-sec dark:text-text-dark-sec text-lg font-medium">
-              <TextRoll>{t('footerDesc')}</TextRoll>
+              <DynamicText translationKey="footerDesc" />
             </p>
           </div>
           

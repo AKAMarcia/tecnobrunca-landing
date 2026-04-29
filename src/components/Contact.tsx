@@ -6,6 +6,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
+import { DynamicText } from './DynamicText';
 
 const Contact = () => {
   const { t } = useLanguage();
@@ -87,10 +88,10 @@ const Contact = () => {
           >
             <div className="text-center lg:text-left">
               <h2 className="mb-4 text-4xl font-extrabold lg:text-5xl tracking-tight text-text-light dark:text-text-dark">
-                {t('contactTitle')}
+                <DynamicText translationKey="contactTitle" />
               </h2>
               <p className="text-lg text-text-light-sec dark:text-text-dark-sec">
-                {t('contactSub')}
+                <DynamicText translationKey="contactSub" />
               </p>
             </div>
             <div className="mx-auto w-fit lg:mx-0">
@@ -142,7 +143,9 @@ const Contact = () => {
               </div>
 
               <div className="grid w-full items-center gap-2">
-                <Label htmlFor="name" className="text-base">{t('formName')}</Label>
+                <Label htmlFor="name" className="text-base">
+                  <DynamicText translationKey="formName" />
+                </Label>
                 <Input 
                   type="text" 
                   id="name" 
@@ -154,7 +157,9 @@ const Contact = () => {
                 />
               </div>
               <div className="grid w-full items-center gap-2">
-                <Label htmlFor="email" className="text-base">{t('formEmail')}</Label>
+                <Label htmlFor="email" className="text-base">
+                  <DynamicText translationKey="formEmail" />
+                </Label>
                 <Input 
                   type="email" 
                   id="email" 
@@ -166,7 +171,9 @@ const Contact = () => {
                 />
               </div>
               <div className="grid w-full gap-2">
-                <Label htmlFor="message" className="text-base">{t('formMessage')}</Label>
+                <Label htmlFor="message" className="text-base">
+                  <DynamicText translationKey="formMessage" />
+                </Label>
                 <Textarea 
                   id="message" 
                   name="message"
@@ -194,7 +201,7 @@ const Contact = () => {
                   animate={{ opacity: 1, y: 0 }}
                   className="p-4 bg-primary/10 text-primary rounded-xl border border-primary/20 text-center font-bold shadow-sm"
                 >
-                  {t('formSuccessMsg')}
+                  <DynamicText translationKey="formSuccessMsg" />
                 </motion.div>
               )}
             </form>

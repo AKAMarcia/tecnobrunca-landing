@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
-import { Save, Loader2, Link2 } from 'lucide-react';
+import { Loader2, Link2 } from 'lucide-react';
 
 type SettingItem = {
   id: number;

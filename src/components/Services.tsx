@@ -1,12 +1,30 @@
-import { useLanguage } from '../LanguageContext';
 import { motion } from 'framer-motion';
 import { FileText, BarChart3, Code2, Settings } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ServiceModal from './ServiceModal';
+import { DynamicText } from './DynamicText';
+import { supabase } from '../lib/supabase';
 
 const Services = () => {
-  const { t } = useLanguage();
   const [selectedService, setSelectedService] = useState<{titleKey: string, detailKey: string} | null>(null);
+  const [serviceImage, setServiceImage] = useState('/assets/images/hero_carousel_1_1777428642562.png');
+
+  useEffect(() => {
+    const fetchServiceImage = async () => {
+      const { data, error } = await supabase
+        .from('assets')
+        .select('url')
+        .eq('category', 'ServiceImage')
+        .order('display_order', { ascending: true })
+        .limit(1)
+        .single();
+      
+      if (!error && data) {
+        setServiceImage(data.url);
+      }
+    };
+    fetchServiceImage();
+  }, []);
 
   const servicesList = [
     {
@@ -48,15 +66,17 @@ const Services = () => {
         <div className="container mx-auto px-6 pt-16 relative z-10">
           
           <div className="text-center md:text-left mb-16 max-w-3xl">
-            <h2 className="text-3xl md:text-5xl font-extrabold mb-6 leading-tight">{t('servicesMainTitle')}</h2>
+            <h2 className="text-3xl md:text-5xl font-extrabold mb-6 leading-tight">
+              <DynamicText translationKey="servicesMainTitle" />
+            </h2>
             <p className="text-lg text-text-light-sec dark:text-text-dark-sec">
-              {t('servicesSub')}
+              <DynamicText translationKey="servicesSub" />
             </p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             
-            {/* Left side: Illustration */}
+            {/* Left side: Illustration (Dynamic) */}
             <motion.div 
               initial={{ opacity: 0, x: -40 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -64,10 +84,12 @@ const Services = () => {
               transition={{ duration: 0.8 }}
               className="relative hidden lg:block"
             >
-              {/* Abstract shape background for the illustration */}
               <div className="absolute inset-0 bg-gradient-to-tr from-primary to-accent rounded-full blur-3xl opacity-20 dark:opacity-30 mix-blend-multiply dark:mix-blend-screen animate-pulse"></div>
-              {/* Illustration placeholder - could be replaced with an actual image */}
-              <img src="/assets/images/hero_carousel_1_1777428642562.png" alt="Services Illustration" className="relative rounded-[2rem] shadow-2xl object-cover h-[500px] w-full" />
+              <img 
+                src={serviceImage} 
+                alt="Services Illustration" 
+                className="relative rounded-[2rem] shadow-2xl object-cover h-[500px] w-full border border-border-light dark:border-border-dark" 
+              />
             </motion.div>
 
             {/* Right side: Services List */}
@@ -86,12 +108,14 @@ const Services = () => {
                     {srv.icon}
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">{t(srv.titleKey)}</h3>
+                    <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">
+                      <DynamicText translationKey={srv.titleKey} />
+                    </h3>
                     <p className="text-text-light-sec dark:text-text-dark-sec text-sm leading-relaxed mb-3">
-                      {t(srv.descKey)}
+                      <DynamicText translationKey={srv.descKey} />
                     </p>
                     <span className="text-primary font-semibold text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
-                      {t('readMore')} <span aria-hidden="true">&rarr;</span>
+                      <DynamicText translationKey="readMore" /> <span aria-hidden="true">&rarr;</span>
                     </span>
                   </div>
                 </motion.div>

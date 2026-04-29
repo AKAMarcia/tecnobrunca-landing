@@ -2,6 +2,7 @@ import { useLanguage } from '../LanguageContext';
 import { motion, useInView } from 'framer-motion';
 import { useRef, useEffect, useState } from 'react';
 import { Users, Award, Zap } from 'lucide-react';
+import { DynamicText } from './DynamicText';
 
 const StatItem = ({ value, label, icon: Icon, delay }: { value: string, label: string, icon: any, delay: number }) => {
   const ref = useRef(null);
@@ -79,15 +80,15 @@ const About = () => {
           >
 
             <h2 className="text-4xl md:text-6xl font-extrabold mb-8 tracking-tight text-text-light dark:text-text-dark leading-[1.1]">
-              {t('aboutTitle')}
+              <DynamicText translationKey="aboutTitle" />
             </h2>
 
             <div className="space-y-6">
               <p className="text-xl text-text-light-sec dark:text-text-dark-sec leading-relaxed">
-                {t('aboutP1')}
+                <DynamicText translationKey="aboutP1" />
               </p>
               <p className="text-lg text-text-light-sec dark:text-text-dark-sec leading-relaxed opacity-80">
-                {t('aboutP2')}
+                <DynamicText translationKey="aboutP2" />
               </p>
             </div>
 
@@ -116,9 +117,11 @@ const About = () => {
               <div className="absolute -right-4 -bottom-4 opacity-10 group-hover:scale-110 transition-transform duration-500">
                 <Award size={160} />
               </div>
-              <h3 className="text-2xl font-bold mb-2">{t('missionTitle')}</h3>
+              <h3 className="text-2xl font-bold mb-2">
+                <DynamicText translationKey="missionTitle" />
+              </h3>
               <p className="text-white/90 text-lg leading-relaxed max-w-md">
-                {t('missionDesc')}
+                <DynamicText translationKey="missionDesc" />
               </p>
             </motion.div>
           </div>

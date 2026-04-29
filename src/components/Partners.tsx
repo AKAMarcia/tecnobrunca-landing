@@ -1,52 +1,90 @@
-import { useLanguage } from '../LanguageContext';
+import { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
+import { motion } from 'framer-motion';
+import { DynamicText } from './DynamicText';
 
-const ICONS_ALL = [
-  { src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/php/php-original.svg", alt: "PHP" },
-  { src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/html5/html5-original.svg", alt: "HTML5" },
-  { src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/css3/css3-original.svg", alt: "CSS3" },
-  { src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/javascript/javascript-original.svg", alt: "JavaScript" },
-  { src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/typescript/typescript-original.svg", alt: "TypeScript" },
-  { src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/react/react-original.svg", alt: "React" },
-  { src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/vuejs/vuejs-original.svg", alt: "Vue.js" },
-  { src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/nodejs/nodejs-original.svg", alt: "Node.js" },
-  { src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/mysql/mysql-original.svg", alt: "MySQL" },
-  { src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/tailwindcss/tailwindcss-original.svg", alt: "Tailwind CSS" },
-  { src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/amazonwebservices/amazonwebservices-original-wordmark.svg", alt: "AWS" },
-  { src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/github/github-original.svg", alt: "GitHub" },
-];
+type Asset = {
+  id: number;
+  url: string;
+  alt: string;
+  category: string;
+};
 
 const Partners = () => {
-  const { t } = useLanguage();
+  const [logos, setLogos] = useState<Asset[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchLogos = async () => {
+      const { data, error } = await supabase
+        .from('assets')
+        .select('*')
+        .eq('category', 'PartnerLogo')
+        .order('display_order', { ascending: true });
+
+      if (!error && data) {
+        setLogos(data);
+      }
+      setLoading(false);
+    };
+
+    fetchLogos();
+  }, []);
+
+  // Para el efecto de scroll infinito, duplicamos la lista
+  const marqueeLogos = [...logos, ...logos];
 
   return (
     <section className="relative py-24 overflow-hidden bg-bg-light-sec dark:bg-bg-dark-sec border-y border-border-light dark:border-border-dark">
-      {/* Light/Dark grid background */}
+      {/* Background decoration */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,0,0,0.05)_1px,transparent_1px)] dark:bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.05)_1px,transparent_1px)] [background-size:24px_24px]" />
-
-      {/* Content */}
-      <div className="relative max-w-7xl mx-auto px-6 text-center z-10">
+      
+      <div className="relative z-10 max-w-7xl mx-auto px-6 text-center">
         <h2 className="text-3xl lg:text-5xl font-extrabold tracking-tight mb-4">
-          {t('partnersMainTitle')}
+          <DynamicText translationKey="partnersMainTitle" />
         </h2>
         <p className="mt-4 text-lg text-text-light-sec dark:text-text-dark-sec max-w-2xl mx-auto mb-16">
-          {t('partnersDesc')}
+          <DynamicText translationKey="partnersDesc" />
         </p>
 
-        {/* Static Grid */}
-        <div className="flex flex-wrap justify-center gap-6 md:gap-8 max-w-4xl mx-auto">
-          {ICONS_ALL.map((icon, i) => (
-            <div 
-              key={i} 
-              className="h-20 w-20 md:h-24 md:w-24 flex-shrink-0 rounded-2xl bg-white dark:bg-slate-50 border border-border-light dark:border-transparent shadow-sm flex items-center justify-center transition-all duration-300 hover:-translate-y-2 hover:shadow-lg group"
-            >
-              <img 
-                src={icon.src} 
-                alt={icon.alt} 
-                className="h-10 w-10 md:h-12 md:w-12 object-contain group-hover:scale-110 transition-transform duration-300" 
-              />
+        {loading ? (
+          <div className="h-32 flex items-center justify-center">
+            <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        ) : (
+          <div className="relative">
+            {/* Gradientes laterales para suavizar el scroll */}
+            <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-bg-light-sec dark:from-bg-dark-sec to-transparent z-10 pointer-events-none"></div>
+            <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-bg-light-sec dark:from-bg-dark-sec to-transparent z-10 pointer-events-none"></div>
+
+            {/* Marquee Container */}
+            <div className="flex overflow-hidden group">
+              <motion.div 
+                className="flex gap-8 py-4 px-4"
+                animate={{ x: [0, -1920] }} // Ajustar según el ancho total
+                transition={{ 
+                  duration: 40, 
+                  repeat: Infinity, 
+                  ease: "linear",
+                  repeatType: "loop" 
+                }}
+              >
+                {marqueeLogos.map((logo, i) => (
+                  <div 
+                    key={`${logo.id}-${i}`} 
+                    className="h-20 w-32 md:h-24 md:w-40 flex-shrink-0 rounded-2xl bg-bg-light dark:bg-bg-dark border border-border-light dark:border-border-dark shadow-sm flex items-center justify-center transition-all duration-300 hover:-translate-y-2 hover:shadow-lg hover:border-primary group/card"
+                  >
+                    <img 
+                      src={logo.url} 
+                      alt={logo.alt} 
+                      className="h-10 w-auto max-w-[80%] md:h-12 object-contain grayscale opacity-60 group-hover/card:grayscale-0 group-hover/card:opacity-100 transition-all duration-500" 
+                    />
+                  </div>
+                ))}
+              </motion.div>
             </div>
-          ))}
-        </div>
+          </div>
+        )}
       </div>
     </section>
   );

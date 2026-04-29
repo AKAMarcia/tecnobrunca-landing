@@ -9,6 +9,9 @@ import Login from './pages/admin/Login';
 import Dashboard from './pages/admin/Dashboard';
 import TextsManager from './pages/admin/TextsManager';
 import SettingsManager from './pages/admin/SettingsManager';
+import AssetsManager from './pages/admin/AssetsManager';
+import SocialManager from './pages/admin/SocialManager';
+import UsersManager from './pages/admin/UsersManager';
 
 function App() {
   return (
@@ -30,6 +33,9 @@ function App() {
                   <Route path="dashboard" element={<Dashboard />} />
                   <Route path="texts" element={<TextsManager />} />
                   <Route path="settings" element={<SettingsManager />} />
+                  <Route path="assets" element={<AssetsManager />} />
+                  <Route path="social" element={<SocialManager />} />
+                  <Route path="users" element={<UsersManager />} />
                 </Route>
               </Route>
 

@@ -2,12 +2,16 @@ import { useTheme } from '../ThemeContext';
 import { useLanguage } from '../LanguageContext';
 import { Moon, Sun, Languages, Menu, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { DynamicText } from './DynamicText';
 
 const Navbar = () => {
   const { theme, toggleTheme } = useTheme();
-  const { lang, t, toggleLang } = useLanguage();
+  const { lang, getComponentKeys, toggleLang } = useLanguage();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Obtenemos dinámicamente las claves del componente Navbar
+  const navKeys = getComponentKeys('Navbar');
 
   useEffect(() => {
     const handleScroll = () => {
@@ -16,6 +20,14 @@ const Navbar = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Función para determinar el href basado en la clave (ej: navAbout -> #about)
+  const getHref = (key: string) => {
+    if (key === 'navHome') return '#home';
+    if (key === 'navContact') return '#contact';
+    const section = key.toLowerCase().replace('nav', '');
+    return `#${section}`;
+  };
 
   return (
     <header 
@@ -32,12 +44,23 @@ const Navbar = () => {
           </a>
         </div>
         
-        {/* Desktop Nav */}
+        {/* Desktop Nav Dinámico */}
         <nav className="hidden md:flex items-center gap-8">
-          <a href="#home" className="text-sm font-semibold text-text-light-sec hover:text-primary dark:text-text-dark-sec dark:hover:text-primary transition-colors">{t('navHome')}</a>
-          <a href="#services" className="text-sm font-semibold text-text-light-sec hover:text-primary dark:text-text-dark-sec dark:hover:text-primary transition-colors">{t('navServices')}</a>
-          <a href="#about" className="text-sm font-semibold text-text-light-sec hover:text-primary dark:text-text-dark-sec dark:hover:text-primary transition-colors">{t('navAbout')}</a>
-          <a href="#contact" className="btn-primary py-2 px-5 text-sm">{t('navContact')}</a>
+          {navKeys.map((key) => {
+            const isButton = key === 'navContact';
+            return (
+              <a 
+                key={key}
+                href={getHref(key)} 
+                className={isButton 
+                  ? "btn-primary py-2 px-5 text-sm" 
+                  : "text-sm font-semibold text-text-light-sec hover:text-primary dark:text-text-dark-sec dark:hover:text-primary transition-colors"
+                }
+              >
+                <DynamicText translationKey={key} />
+              </a>
+            );
+          })}
         </nav>
 
         <div className="flex items-center gap-2">
@@ -67,13 +90,19 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu Dinámico */}
       {mobileMenuOpen && (
         <div className="md:hidden absolute top-20 left-0 w-full bg-bg-light dark:bg-bg-dark border-b border-border-light dark:border-border-dark py-4 px-6 flex flex-col gap-4 shadow-xl">
-          <a href="#home" onClick={() => setMobileMenuOpen(false)} className="font-semibold block py-2">{t('navHome')}</a>
-          <a href="#services" onClick={() => setMobileMenuOpen(false)} className="font-semibold block py-2">{t('navServices')}</a>
-          <a href="#about" onClick={() => setMobileMenuOpen(false)} className="font-semibold block py-2">{t('navAbout')}</a>
-          <a href="#contact" onClick={() => setMobileMenuOpen(false)} className="btn-primary text-center mt-2">{t('navContact')}</a>
+          {navKeys.map((key) => (
+            <a 
+              key={key}
+              href={getHref(key)} 
+              onClick={() => setMobileMenuOpen(false)} 
+              className={key === 'navContact' ? "btn-primary text-center mt-2" : "font-semibold block py-2"}
+            >
+              <DynamicText translationKey={key} />
+            </a>
+          ))}
         </div>
       )}
     </header>

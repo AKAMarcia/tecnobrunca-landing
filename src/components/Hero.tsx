@@ -11,13 +11,20 @@ const Hero = () => {
 
   const [titleNumber, setTitleNumber] = useState(0);
   
-  const titlesEs = useMemo(() => ["Desarrollo de Software", "Soluciones Cloud", "Diseño UI/UX", "Aplicaciones Móviles", "Innovación Digital"], []);
-  const titlesEn = useMemo(() => ["Software Development", "Cloud Solutions", "UI/UX Design", "Mobile Applications", "Digital Innovation"], []);
-  const titles = lang === 'es' ? titlesEs : titlesEn;
+  // Obtenemos los títulos del CMS. Si no existen, usamos un fallback.
+  const titles = useMemo(() => {
+    const raw = t('hero_rotating_titles');
+    if (raw === 'hero_rotating_titles' || !raw.includes('|')) {
+      return lang === 'es' 
+        ? ["Desarrollo de Software", "Soluciones Cloud", "Diseño UI/UX", "Aplicaciones Móviles", "Innovación Digital"]
+        : ["Software Development", "Cloud Solutions", "UI/UX Design", "Mobile Applications", "Digital Innovation"];
+    }
+    return raw.split('|').map(s => s.trim());
+  }, [t, lang]);
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      if (titleNumber === titles.length - 1) {
+      if (titleNumber >= titles.length - 1) {
         setTitleNumber(0);
       } else {
         setTitleNumber(titleNumber + 1);
@@ -45,7 +52,6 @@ const Hero = () => {
             <span className="text-transparent bg-clip-text bg-gradient-to-b from-neutral-800 to-neutral-500 dark:from-neutral-50 dark:to-neutral-400">
               {lang === 'es' ? "Innovación en" : "Innovation in"}
             </span>
-            {/* Contenedor animado con padding extra para no cortar sombras y w-max para que no lo limite la columna */}
             <span className="relative flex w-max justify-start overflow-hidden py-4 -my-4 px-2 -mx-2">
               <span className="invisible pointer-events-none">{titles[0]}</span>
               {titles.map((title, index) => (

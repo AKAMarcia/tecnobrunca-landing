@@ -1,20 +1,31 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
-import { Save, Loader2, Search } from 'lucide-react';
+import { Save, Loader2, Search, Plus, Trash2, Filter } from 'lucide-react';
 
-type TranslationItem = {
+type Translation = {
   id: number;
   key: string;
   value_es: string;
   value_en: string;
+  component: string;
+  effect: string;
+  created_at: string;
 };
 
+const COMPONENTS = ['Navbar', 'Hero', 'Services', 'About', 'Contact', 'Footer', 'General'];
+const EFFECTS = [
+  { id: 'none', name: 'Ninguno' },
+  { id: 'TextRoll', name: 'TextRoll (Animación)' },
+  { id: 'array', name: 'Lista (separada por |)' },
+];
+
 const TextsManager = () => {
-  const [translations, setTranslations] = useState<TranslationItem[]>([]);
+  const [translations, setTranslations] = useState<Translation[]>([]);
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const [selectedComponent, setSelectedComponent] = useState('Todos');
+  const [showAddModal, setShowAddModal] = useState(false);
 
   useEffect(() => {
     fetchTranslations();
@@ -25,184 +36,283 @@ const TextsManager = () => {
     const { data, error } = await supabase
       .from('translations')
       .select('*')
-      .order('key', { ascending: true });
+      .order('created_at', { ascending: false });
 
     if (error) {
       console.error('Error fetching translations:', error);
-      setError('Error al cargar las traducciones.');
     } else {
       setTranslations(data || []);
     }
     setLoading(false);
   };
 
-  const handleSave = async (id: number, key: string, value_es: string, value_en: string) => {
+  const handleSave = async (id: number, updates: Partial<Translation>) => {
     setSavingId(id);
     const { error } = await supabase
       .from('translations')
-      .update({ value_es, value_en })
+      .update(updates)
       .eq('id', id);
 
     if (error) {
-      console.error('Error updating translation:', error);
       alert('Error al guardar: ' + error.message);
     } else {
-      // Opcional: mostrar un toast de éxito
+      setTranslations(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t));
     }
     setSavingId(null);
   };
 
-  const filteredTranslations = translations.filter(
-    (t) =>
-      t.key.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      t.value_es.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      t.value_en.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleDelete = async (id: number) => {
+    if (!confirm('¿Seguro que deseas eliminar este texto?')) return;
+    const { error } = await supabase.from('translations').delete().eq('id', id);
+    if (!error) {
+      setTranslations(prev => prev.filter(t => t.id !== id));
+    }
+  };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <Loader2 className="animate-spin text-primary w-8 h-8" />
-      </div>
-    );
-  }
+  const handleAdd = async (newItem: any) => {
+    const { data, error } = await supabase
+      .from('translations')
+      .insert([newItem])
+      .select();
+
+    if (!error && data) {
+      setTranslations(prev => [data[0], ...prev]);
+      setShowAddModal(false);
+    } else {
+      alert('Error al crear: ' + error?.message);
+    }
+  };
+
+  const filteredTranslations = translations.filter(t => {
+    const matchesSearch = t.key.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                          t.value_es.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesComp = selectedComponent === 'Todos' || t.component === selectedComponent;
+    return matchesSearch && matchesComp;
+  });
+
+  if (loading) return <div className="flex justify-center p-12"><Loader2 className="animate-spin text-primary" /></div>;
 
   return (
     <div className="max-w-6xl mx-auto">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-text-light dark:text-text-dark">Textos y Traducciones</h1>
-          <p className="text-text-light-sec dark:text-text-dark-sec mt-2">
-            Administra el contenido de texto del Landing Page.
-          </p>
+          <h1 className="text-3xl font-bold">Gestor de Textos (CMS)</h1>
+          <p className="text-text-light-sec dark:text-text-dark-sec mt-2">Administra todas las traducciones y efectos del sitio.</p>
         </div>
-        
-        <div className="relative w-full md:w-64">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="h-5 w-5 text-text-light-sec dark:text-text-dark-sec" />
-          </div>
-          <input
-            type="text"
-            placeholder="Buscar..."
+        <button 
+          onClick={() => setShowAddModal(true)}
+          className="bg-primary text-white px-6 py-2.5 rounded-xl flex items-center gap-2 hover:bg-primary-dark transition-all shadow-lg shadow-primary/20 font-bold"
+        >
+          <Plus size={20} /> Nuevo Texto
+        </button>
+      </div>
+
+      {/* Filters */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-light-sec" size={18} />
+          <input 
+            type="text" 
+            placeholder="Buscar por clave o contenido..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 w-full px-4 py-2 rounded-lg border border-border-light dark:border-border-dark bg-bg-light dark:bg-bg-dark text-text-light dark:text-text-dark focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border-light dark:border-border-dark bg-bg-light dark:bg-bg-dark outline-none focus:ring-2 focus:ring-primary/50 transition-all"
           />
+        </div>
+        <div className="relative">
+          <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-text-light-sec" size={18} />
+          <select 
+            value={selectedComponent}
+            onChange={(e) => setSelectedComponent(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border-light dark:border-border-dark bg-bg-light dark:bg-bg-dark outline-none focus:ring-2 focus:ring-primary/50 appearance-none"
+          >
+            <option value="Todos">Todos los Componentes</option>
+            {COMPONENTS.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
         </div>
       </div>
 
-      {error && (
-        <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-lg mb-6">
-          {error}
-        </div>
-      )}
-
-      <div className="bg-bg-light dark:bg-bg-dark border border-border-light dark:border-border-dark rounded-2xl overflow-hidden">
+      {/* Table */}
+      <div className="bg-bg-light dark:bg-bg-dark rounded-2xl border border-border-light dark:border-border-dark overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-bg-light-sec dark:bg-bg-dark-sec border-b border-border-light dark:border-border-dark">
-                <th className="p-4 font-semibold text-text-light-sec dark:text-text-dark-sec w-1/4">Clave (Key)</th>
-                <th className="p-4 font-semibold text-text-light-sec dark:text-text-dark-sec w-1/3">Español</th>
-                <th className="p-4 font-semibold text-text-light-sec dark:text-text-dark-sec w-1/3">Inglés</th>
-                <th className="p-4 font-semibold text-text-light-sec dark:text-text-dark-sec text-center w-24">Acción</th>
+                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-text-light-sec">Clave / Contexto</th>
+                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-text-light-sec">Contenido (ES / EN)</th>
+                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-text-light-sec w-40">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border-light dark:divide-border-dark">
-              {filteredTranslations.map((item) => (
-                <TranslationRow
-                  key={item.id}
-                  item={item}
-                  onSave={handleSave}
-                  isSaving={savingId === item.id}
+              {filteredTranslations.map((t) => (
+                <TranslationRow 
+                  key={t.id} 
+                  item={t} 
+                  onSave={handleSave} 
+                  onDelete={handleDelete}
+                  isSaving={savingId === t.id}
                 />
               ))}
-              {filteredTranslations.length === 0 && (
-                <tr>
-                  <td colSpan={4} className="p-8 text-center text-text-light-sec dark:text-text-dark-sec">
-                    No se encontraron textos.
-                  </td>
-                </tr>
-              )}
             </tbody>
           </table>
         </div>
       </div>
+
+      {showAddModal && <AddModal onClose={() => setShowAddModal(false)} onAdd={handleAdd} />}
     </div>
   );
 };
 
-const TranslationRow = ({
-  item,
-  onSave,
-  isSaving,
-}: {
-  item: TranslationItem;
-  onSave: (id: number, key: string, es: string, en: string) => void;
-  isSaving: boolean;
-}) => {
+const TranslationRow = ({ item, onSave, onDelete, isSaving }: any) => {
   const [esValue, setEsValue] = useState(item.value_es);
   const [enValue, setEnValue] = useState(item.value_en);
-  
-  const hasChanges = esValue !== item.value_es || enValue !== item.value_en;
-  
-  // Si el texto es muy largo, usamos un textarea, sino un input
-  const isLongText = esValue.length > 50 || enValue.length > 50 || esValue.includes('<');
+  const [comp, setComp] = useState(item.component);
+  const [eff, setEff] = useState(item.effect || 'none');
+
+  const hasChanges = esValue !== item.value_es || enValue !== item.value_en || comp !== item.component || eff !== item.effect;
 
   return (
-    <tr className="hover:bg-bg-light-sec/50 dark:hover:bg-bg-dark-sec/50 transition-colors">
-      <td className="p-4 align-top">
-        <code className="text-sm bg-bg-light-sec dark:bg-bg-dark-sec px-2 py-1 rounded text-primary border border-border-light dark:border-border-dark">
-          {item.key}
-        </code>
+    <tr className="hover:bg-primary/5 transition-colors group">
+      <td className="px-6 py-4">
+        <div className="space-y-2">
+          <span className="text-sm font-mono text-primary font-bold">{item.key}</span>
+          <select 
+            value={comp} 
+            onChange={(e) => setComp(e.target.value)}
+            className="block text-[10px] px-2 py-0.5 rounded border border-border-light dark:border-border-dark bg-transparent outline-none uppercase font-bold"
+          >
+            {COMPONENTS.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] text-text-light-sec uppercase font-bold">Efecto:</span>
+            <select
+              value={eff}
+              onChange={(e) => setEff(e.target.value)}
+              className="text-[10px] bg-bg-light dark:bg-bg-dark border border-border-light dark:border-border-dark rounded px-1.5 py-0.5 outline-none"
+            >
+              {EFFECTS.map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
+            </select>
+          </div>
+        </div>
       </td>
-      <td className="p-4 align-top">
-        {isLongText ? (
-          <textarea
-            value={esValue}
-            onChange={(e) => setEsValue(e.target.value)}
-            className="w-full min-h-[100px] p-2 rounded border border-border-light dark:border-border-dark bg-bg-light dark:bg-bg-dark focus:ring-1 focus:ring-primary outline-none"
-          />
-        ) : (
-          <input
-            type="text"
-            value={esValue}
-            onChange={(e) => setEsValue(e.target.value)}
-            className="w-full p-2 rounded border border-border-light dark:border-border-dark bg-bg-light dark:bg-bg-dark focus:ring-1 focus:ring-primary outline-none"
-          />
-        )}
+      <td className="px-6 py-4 space-y-3">
+        <textarea 
+          value={esValue}
+          onChange={(e) => setEsValue(e.target.value)}
+          className="w-full p-2 text-sm rounded-lg border border-border-light dark:border-border-dark bg-transparent focus:bg-white dark:focus:bg-bg-dark-sec outline-none transition-all resize-none min-h-[60px]"
+          placeholder="Español..."
+        />
+        <textarea 
+          value={enValue}
+          onChange={(e) => setEnValue(e.target.value)}
+          className="w-full p-2 text-sm rounded-lg border border-border-light dark:border-border-dark bg-transparent focus:bg-white dark:focus:bg-bg-dark-sec outline-none transition-all resize-none min-h-[60px]"
+          placeholder="Inglés..."
+        />
       </td>
-      <td className="p-4 align-top">
-        {isLongText ? (
-          <textarea
-            value={enValue}
-            onChange={(e) => setEnValue(e.target.value)}
-            className="w-full min-h-[100px] p-2 rounded border border-border-light dark:border-border-dark bg-bg-light dark:bg-bg-dark focus:ring-1 focus:ring-primary outline-none"
-          />
-        ) : (
-          <input
-            type="text"
-            value={enValue}
-            onChange={(e) => setEnValue(e.target.value)}
-            className="w-full p-2 rounded border border-border-light dark:border-border-dark bg-bg-light dark:bg-bg-dark focus:ring-1 focus:ring-primary outline-none"
-          />
-        )}
-      </td>
-      <td className="p-4 align-top text-center">
-        <button
-          onClick={() => onSave(item.id, item.key, esValue, enValue)}
-          disabled={!hasChanges || isSaving}
-          className={`p-2 rounded-lg transition-colors flex items-center justify-center w-10 h-10 mx-auto ${
-            hasChanges
-              ? 'bg-primary text-white hover:bg-primary-dark'
-              : 'bg-bg-light-sec dark:bg-bg-dark-sec text-text-light-sec dark:text-text-dark-sec opacity-50 cursor-not-allowed'
-          }`}
-          title={hasChanges ? "Guardar cambios" : "Sin cambios"}
-        >
-          {isSaving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
-        </button>
+      <td className="px-6 py-4">
+        <div className="flex flex-col gap-2">
+          <button
+            onClick={() => onSave(item.id, { value_es: esValue, value_en: enValue, component: comp, effect: eff })}
+            disabled={!hasChanges || isSaving}
+            className={`flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all ${
+              hasChanges 
+                ? 'bg-primary text-white shadow-lg shadow-primary/20' 
+                : 'bg-bg-light-sec dark:bg-bg-dark-sec text-text-light-sec opacity-50 cursor-not-allowed'
+            }`}
+          >
+            {isSaving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+            {isSaving ? 'Guardando' : 'Actualizar'}
+          </button>
+          <button 
+            onClick={() => onDelete(item.id)}
+            className="flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
+          >
+            <Trash2 size={14} /> Eliminar
+          </button>
+        </div>
       </td>
     </tr>
+  );
+};
+
+const AddModal = ({ onClose, onAdd }: any) => {
+  const [key, setKey] = useState('');
+  const [es, setEs] = useState('');
+  const [en, setEn] = useState('');
+  const [comp, setComp] = useState('General');
+  const [eff, setEff] = useState('none');
+
+  return (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-bg-light dark:bg-bg-dark w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden border border-border-light dark:border-border-dark animate-in fade-in zoom-in duration-200">
+        <div className="p-6 border-b border-border-light dark:border-border-dark flex justify-between items-center bg-bg-light-sec dark:bg-bg-dark-sec">
+          <h2 className="text-xl font-bold">Nueva Traducción</h2>
+          <button onClick={onClose} className="text-text-light-sec hover:text-text-light">&times;</button>
+        </div>
+        <div className="p-6 space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Clave (Única)</label>
+              <input 
+                type="text" 
+                value={key} 
+                onChange={e => setKey(e.target.value)} 
+                placeholder="ej: about_title"
+                className="w-full p-2 rounded border border-border-light dark:border-border-dark bg-bg-light dark:bg-bg-dark"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Componente</label>
+              <select 
+                value={comp} 
+                onChange={e => setComp(e.target.value)}
+                className="w-full p-2 rounded border border-border-light dark:border-border-dark bg-bg-light dark:bg-bg-dark"
+              >
+                {COMPONENTS.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Efecto Especial</label>
+            <select 
+              value={eff} 
+              onChange={e => setEff(e.target.value)}
+              className="w-full p-2 rounded border border-border-light dark:border-border-dark bg-bg-light dark:bg-bg-dark"
+            >
+              {EFFECTS.map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
+            </select>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Español</label>
+              <textarea 
+                value={es} 
+                onChange={e => setEs(e.target.value)} 
+                className="w-full p-2 rounded border border-border-light dark:border-border-dark bg-bg-light dark:bg-bg-dark min-h-[100px]"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Inglés</label>
+              <textarea 
+                value={en} 
+                onChange={e => setEn(e.target.value)} 
+                className="w-full p-2 rounded border border-border-light dark:border-border-dark bg-bg-light dark:bg-bg-dark min-h-[100px]"
+              />
+            </div>
+          </div>
+        </div>
+        <div className="p-6 bg-bg-light-sec dark:bg-bg-dark-sec border-t border-border-light dark:border-border-dark flex justify-end gap-3">
+          <button onClick={onClose} className="px-4 py-2 text-text-light-sec">Cancelar</button>
+          <button 
+            onClick={() => onAdd({ key, value_es: es, value_en: en, component: comp, effect: eff })}
+            className="bg-primary text-white px-6 py-2 rounded-lg font-bold"
+            disabled={!key || !es || !en}
+          >
+            Crear Registro
+          </button>
+        </div>
+      </div>
+    </div>
   );
 };
 

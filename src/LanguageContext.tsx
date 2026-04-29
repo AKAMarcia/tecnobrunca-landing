@@ -3,13 +3,18 @@ import { supabase } from './lib/supabase';
 
 type Language = 'es' | 'en';
 
+export type TranslationData = {
+  value: string;
+  effect: string;
+};
+
 type Translations = {
   [key in Language]: {
-    [key: string]: string;
+    [key: string]: TranslationData;
   };
 };
 
-const defaultTranslations: Translations = {
+const defaultTranslations: any = {
   es: {
     navHome: "Inicio",
     navServices: "Servicios",
@@ -22,6 +27,7 @@ const defaultTranslations: Translations = {
     heroDesc2: "Arquitecturas robustas para conectar tu negocio con el futuro.",
     heroTitle3: "Diseño de Experiencias UI/UX",
     heroDesc3: "Interfaces intuitivas que enamoran a tus usuarios desde el primer click.",
+    hero_rotating_titles: "Desarrollo de Software|Soluciones Cloud|Diseño UI/UX|Aplicaciones Móviles|Innovación Digital",
     partnersTitle: "Tecnologías y Stack",
     partnersMainTitle: "Potenciamos tu proyecto con las mejores herramientas",
     partnersDesc: "Utilizamos las tecnologías más modernas y robustas del mercado para garantizar que tu producto sea escalable, rápido y seguro.",
@@ -29,20 +35,20 @@ const defaultTranslations: Translations = {
     servicesSub: "Más que ofrecerte un servicio, queremos establecer relaciones comerciales y que nos veas como un aliado para el crecimiento de tu empresa.",
     srvInvoiceTitle: "Facturación electrónica",
     srvInvoiceDesc: "Te ofrecemos un sistema de facturación electrónica. (Costa Rica)",
-    srvInvoiceDetail: "<h4>La solución completa para tu facturación</h4><p>Simplifica tus procesos administrativos con nuestro sistema de facturación electrónica certificado para Costa Rica. Olvídate del papel y cumple con todas las normativas del Ministerio de Hacienda de forma automática, rápida y segura.</p><h4>¿Qué incluye?</h4><ul><li>Generación ilimitada de facturas, notas de crédito y débito.</li><li>Recepción y validación de comprobantes electrónicos.</li><li>Catálogo de productos y servicios (CABYS).</li><li>Reportes automatizados y exportación a Excel.</li><li>Soporte técnico especializado.</li></ul>",
+    srvInvoiceDetail: "<h4>La solución completa para tu facturación</h4><p>Simplifica tus procesos administrativos con nuestro sistema de facturación electrónica certificado para Costa Rica. Olvídate del papel y cumple con todas las normativas del Ministerio de Hacienda de forma automática, rápida y segura.</p>",
     srvDataTitle: "Análisis de datos",
     srvDataDesc: "Te ayudamos a analizar tus datos y generar dashboards.",
-    srvDataDetail: "<h4>¡Bienvenido a nuestro servicio de análisis y visualización de datos personalizado!</h4><p>Estamos comprometidos a ofrecer soluciones adaptadas a tus necesidades específicas de análisis y visualización de datos.</p><p>Sabemos que cada empresa tiene sus propias necesidades y desafíos en cuanto al manejo de sus datos. Por eso, trabajamos junto a ti para entender tus requerimientos y desarrollar una solución que cumpla con ellos.</p><h4>Nuestro proceso incluye:</h4><ul><li><strong>Análisis de requisitos:</strong> En este primer paso, trabajaremos contigo para entender tus requerimientos y determinar cómo podemos ayudarte.</li><li><strong>Recopilación y limpieza de datos:</strong> Recopilaremos y limpiaremos tus datos para asegurarnos de que estén listos.</li><li><strong>Análisis y visualización:</strong> Realizaremos el análisis y la visualización mediante dashboards interactivos.</li><li><strong>Presentación de resultados:</strong> Te presentaremos los resultados de manera clara y concisa.</li></ul>",
+    srvDataDetail: "<h4>Análisis personalizado</h4><p>Estamos comprometidos a ofrecer soluciones adaptadas a tus necesidades específicas de análisis y visualización de datos.</p>",
     srvWebTitle: "Desarrollo web",
     srvWebDesc: "Te desarrollamos el sitio web que tu negocio necesita.",
-    srvWebDetail: "<h4>¿Por qué es importante tener un sitio web para tu empresa?</h4><p>En un mundo cada vez más digital, tener un sitio web es esencial para cualquier empresa que quiera tener éxito. Un sitio web te permite llegar a un público más amplio y proporciona una plataforma para mostrar tus productos o servicios.</p><h4>¿Cómo se debe desarrollar un buen sitio web?</h4><ul><li><strong>Diseño de un plan de sitio:</strong> Estructura y organización general.</li><li><strong>Diseño UI/UX:</strong> Apariencia y paleta de colores.</li><li><strong>Desarrollo del contenido:</strong> Textos, imágenes y videos.</li><li><strong>Desarrollo técnico:</strong> Codificación del sitio web.</li><li><strong>Pruebas y depuración:</strong> Asegurar el correcto funcionamiento.</li><li><strong>Lanzamiento:</strong> Publicación y mantenimiento.</li></ul><p>En TecnoBrunca te ofrecemos soluciones desde la creación de un sitio web completamente personalizado hasta la renovación de un sitio web existente.</p>",
+    srvWebDetail: "<h4>Sitios web profesionales</h4><p>En un mundo cada vez más digital, tener un sitio web es esencial para cualquier empresa que quiera tener éxito.</p>",
     srvSoftwareTitle: "Software a la medida",
     srvSoftwareDesc: "Cuéntanos tu proyecto y te desarrollamos el software ideal.",
-    srvSoftwareDetail: "<h4>¡Bienvenido a nuestro servicio de desarrollo de software a la medida!</h4><p>Estamos orgullosos de ofrecer soluciones personalizadas a tus requerimientos de software. Sabemos que cada negocio es único y tiene sus propias necesidades y desafíos.</p><h4>Nuestro proceso de desarrollo de software incluye:</h4><ul><li><strong>Análisis de requisitos:</strong> Entender tus requerimientos y determinar cómo alcanzar tus objetivos.</li><li><strong>Diseño de la solución:</strong> Diseñaremos la estructura, arquitectura y experiencia de usuario.</li><li><strong>Desarrollo y pruebas:</strong> Codificación ágil con pruebas exhaustivas para asegurar que esté libre de errores.</li><li><strong>Implementación y soporte:</strong> Implementaremos el software en tu entorno y te ofreceremos soporte continuo.</li></ul><p>Si estás interesado en llevar tu negocio al siguiente nivel, no dudes en ponerte en contacto con nosotros.</p>",
+    srvSoftwareDetail: "<h4>Desarrollo personalizado</h4><p>Estamos orgullosos de ofrecer soluciones personalizadas a tus requerimientos de software.</p>",
     readMore: "Leer más",
     closeBtn: "Cerrar",
     aboutTitle: "Sobre TecnoBrunca",
-    aboutP1: "Somos un equipo apasionado por la tecnología, dedicado a construir soluciones de software de clase mundial. Nos enfocamos en la calidad, el diseño y la innovación.",
+    aboutP1: "Somos un equipo apasionado por la tecnología, dedicado a construir soluciones de software de clase mundial.",
     aboutP2: "Con base en la excelencia, ayudamos a empresas a alcanzar su máximo potencial digital.",
     statProjects: "Proyectos",
     statClients: "Clientes Felices",
@@ -60,7 +66,7 @@ const defaultTranslations: Translations = {
     footerDesc: "Desarrollo de software de vanguardia.",
     footerRights: "Todos los derechos reservados.",
     missionTitle: "Nuestra Misión",
-    missionDesc: "Impulsar la transformación digital de empresas mediante soluciones de software innovadoras, escalables y centradas en el usuario."
+    missionDesc: "Impulsar la transformación digital mediante software innovador."
   },
   en: {
     navHome: "Home",
@@ -74,32 +80,33 @@ const defaultTranslations: Translations = {
     heroDesc2: "Robust architectures to connect your business with the future.",
     heroTitle3: "UI/UX Experience Design",
     heroDesc3: "Intuitive interfaces that make your users fall in love from the first click.",
+    hero_rotating_titles: "Software Development|Cloud Solutions|UI/UX Design|Mobile Applications|Digital Innovation",
     partnersTitle: "Technologies & Stack",
     partnersMainTitle: "We power your project with the best tools",
-    partnersDesc: "We use the most modern and robust technologies on the market to ensure your product is scalable, fast, and secure.",
+    partnersDesc: "We use the most modern and robust technologies on the market.",
     servicesMainTitle: "We put our services at your disposal to grow your business",
-    servicesSub: "More than offering you a service, we want to establish commercial relationships and have you see us as an ally for your company's growth.",
+    servicesSub: "More than offering you a service, we want to establish commercial relationships.",
     srvInvoiceTitle: "Electronic Invoicing",
     srvInvoiceDesc: "We offer you an electronic invoicing system. (Costa Rica)",
-    srvInvoiceDetail: "<h4>The complete solution for your billing</h4><p>Simplify your administrative processes with our electronic invoicing system certified for Costa Rica. Forget about paper and automatically, quickly and safely comply with all Ministry of Finance regulations.</p><h4>What does it include?</h4><ul><li>Unlimited generation of invoices, credit and debit notes.</li><li>Reception and validation of electronic vouchers.</li><li>Catalog of products and services (CABYS).</li><li>Automated reports and export to Excel.</li><li>Specialized technical support.</li></ul>",
+    srvInvoiceDetail: "<h4>Complete solution</h4><p>Simplify your administrative processes with our electronic invoicing system.</p>",
     srvDataTitle: "Data Analysis",
     srvDataDesc: "We help you analyze your data and generate dashboards.",
-    srvDataDetail: "<h4>Welcome to our customized data analysis and visualization service!</h4><p>We are committed to offering solutions tailored to your specific data analysis needs.</p><p>We know that each company has its own needs and challenges. That is why we work with you to understand your requirements and develop a solution that meets them.</p><h4>Our process includes:</h4><ul><li><strong>Requirements analysis:</strong> We work with you to understand your needs.</li><li><strong>Data collection and cleaning:</strong> We will collect and clean your data so it is ready.</li><li><strong>Analysis and visualization:</strong> We perform the analysis and build interactive dashboards.</li><li><strong>Presentation of results:</strong> We will present the findings clearly and concisely.</li></ul>",
+    srvDataDetail: "<h4>Customized analysis</h4><p>We are committed to offering solutions tailored to your specific needs.</p>",
     srvWebTitle: "Web Development",
     srvWebDesc: "We develop the website your business needs.",
-    srvWebDetail: "<h4>Why is it important to have a website for your company?</h4><p>In an increasingly digital world, having a website is essential for any company that wants to succeed. A website allows you to reach a wider audience and provides a platform to showcase your products or services.</p><h4>How should a good website be developed?</h4><ul><li><strong>Site plan design:</strong> Structure and overall organization.</li><li><strong>UI/UX Design:</strong> Appearance and color palette.</li><li><strong>Content development:</strong> Texts, images, and videos.</li><li><strong>Technical development:</strong> Site coding.</li><li><strong>Testing and debugging:</strong> Ensuring proper operation.</li><li><strong>Launch:</strong> Publication and maintenance.</li></ul><p>At TecnoBrunca we offer solutions from the creation of a completely customized website to the renovation of an existing one.</p>",
+    srvWebDetail: "<h4>Professional websites</h4><p>In an increasingly digital world, having a website is essential.</p>",
     srvSoftwareTitle: "Custom Software",
     srvSoftwareDesc: "Tell us about your project and we will develop the ideal software.",
-    srvSoftwareDetail: "<h4>Welcome to our custom software development service!</h4><p>We are proud to offer customized solutions for your software requirements. We know that each business is unique and has its own needs and challenges.</p><h4>Our software development process includes:</h4><ul><li><strong>Requirements analysis:</strong> Understanding your needs to achieve your goals.</li><li><strong>Solution design:</strong> We will design the structure, architecture, and user experience.</li><li><strong>Development and testing:</strong> Agile coding with exhaustive testing to ensure it is error-free.</li><li><strong>Implementation and support:</strong> We will deploy the software in your environment and offer ongoing support.</li></ul><p>If you are interested in taking your business to the next level, do not hesitate to contact us.</p>",
+    srvSoftwareDetail: "<h4>Customized solutions</h4><p>We are proud to offer customized solutions for your requirements.</p>",
     readMore: "Read more",
     closeBtn: "Close",
     aboutTitle: "About TecnoBrunca",
-    aboutP1: "We are a team passionate about technology, dedicated to building world-class software solutions. We focus on quality, design, and innovation.",
-    aboutP2: "Based on excellence, we help companies reach their maximum digital potential.",
+    aboutP1: "We are a team passionate about technology, dedicated to building world-class software.",
+    aboutP2: "Based on excellence, we help companies reach their maximum potential.",
     statProjects: "Projects",
     statClients: "Happy Clients",
     contactTitle: "Let's talk about your project",
-    contactSub: "Ready to take your idea to the next level? Contact us and we will respond shortly.",
+    contactSub: "Ready to take your idea to the next level? Contact us.",
     formName: "Full Name",
     formNamePlaceholder: "e.g. John Doe",
     formEmail: "Email Address",
@@ -108,27 +115,40 @@ const defaultTranslations: Translations = {
     formMessagePlaceholder: "Tell us about your project...",
     formSubmit: "Send Message",
     formSending: "Sending...",
-    formSuccessMsg: "Message sent successfully! We will contact you soon.",
+    formSuccessMsg: "Message sent successfully!",
     footerDesc: "Cutting-edge software development.",
     footerRights: "All rights reserved.",
     missionTitle: "Our Mission",
-    missionDesc: "To drive the digital transformation of companies through innovative, scalable, and user-centric software solutions."
+    missionDesc: "To drive digital transformation through innovative software."
   }
+};
+
+const transformDefaults = (): Translations => {
+  const result: any = { es: {}, en: {} };
+  Object.keys(defaultTranslations.es).forEach(key => {
+    result.es[key] = { value: defaultTranslations.es[key], effect: 'none' };
+    result.en[key] = { value: defaultTranslations.en[key], effect: 'none' };
+  });
+  return result;
 };
 
 type LanguageContextType = {
   lang: Language;
   t: (key: string) => string;
+  getMetadata: (key: string) => TranslationData;
+  getComponentKeys: (componentName: string) => string[];
   toggleLang: () => void;
   isLoadingTranslations: boolean;
+  translations: Translations; // Exponer para filtrado avanzado si es necesario
 };
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export const LanguageProvider = ({ children }: { children: React.ReactNode }) => {
   const [lang, setLang] = useState<Language>('es');
-  const [translations, setTranslations] = useState<Translations>(defaultTranslations);
+  const [translations, setTranslations] = useState<Translations>(transformDefaults());
   const [isLoadingTranslations, setIsLoadingTranslations] = useState(true);
+  const [rawMetadata, setRawMetadata] = useState<any[]>([]); // Para guardar los componentes
 
   useEffect(() => {
     const saved = localStorage.getItem('lang') as Language;
@@ -136,7 +156,6 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
       setLang(saved);
     }
     
-    // Fetch translations from Supabase
     const loadTranslations = async () => {
       try {
         const { data, error } = await supabase.from('translations').select('*');
@@ -147,17 +166,19 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
         }
 
         if (data && data.length > 0) {
-          const newTranslations: Translations = { es: {}, en: {} };
+          setRawMetadata(data);
+          const newTranslations = transformDefaults();
           
-          // Primero copiamos los default
-          newTranslations.es = { ...defaultTranslations.es };
-          newTranslations.en = { ...defaultTranslations.en };
-          
-          // Luego sobrescribimos con lo que viene de la BD
           data.forEach(item => {
             if (item.key) {
-              newTranslations.es[item.key] = item.value_es || defaultTranslations.es[item.key];
-              newTranslations.en[item.key] = item.value_en || defaultTranslations.en[item.key];
+              newTranslations.es[item.key] = { 
+                value: item.value_es || (defaultTranslations.es[item.key] || ''), 
+                effect: item.effect || 'none' 
+              };
+              newTranslations.en[item.key] = { 
+                value: item.value_en || (defaultTranslations.en[item.key] || ''), 
+                effect: item.effect || 'none' 
+              };
             }
           });
           
@@ -180,11 +201,22 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
   };
 
   const t = (key: string) => {
-    return translations[lang][key] || defaultTranslations[lang][key] || key;
+    return translations[lang][key]?.value || key;
+  };
+
+  const getMetadata = (key: string): TranslationData => {
+    return translations[lang][key] || { value: key, effect: 'none' };
+  };
+
+  const getComponentKeys = (componentName: string): string[] => {
+    return rawMetadata
+      .filter(item => item.component === componentName)
+      .map(item => item.key)
+      .sort((a, b) => a.localeCompare(b)); // Orden alfabetico por defecto
   };
 
   return (
-    <LanguageContext.Provider value={{ lang, t, toggleLang, isLoadingTranslations }}>
+    <LanguageContext.Provider value={{ lang, t, getMetadata, getComponentKeys, toggleLang, isLoadingTranslations, translations }}>
       {children}
     </LanguageContext.Provider>
   );
