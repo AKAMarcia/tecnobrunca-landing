@@ -1,0 +1,47 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@custom-variant dark (&:where(.dark, .dark *));
+@theme {
+  --color-primary: #ea580c;
+  --color-primary-hover: #c2410c;
+  --color-accent: #f97316;
+  --color-bg-light: #ffffff;
+  --color-bg-light-sec: #f8fafc;
+  --color-text-light: #0f172a;
+  --color-text-light-sec: #475569;
+  --color-bg-dark: #0a0a0a;
+  --color-bg-dark-sec: #171717;
+  --color-text-dark: #f8fafc;
+  --color-text-dark-sec: #94a3b8;
+  --color-border-light: #e2e8f0;
+  --color-border-dark: #262626;
+  --font-sans: 'Inter', sans-serif;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-bg-light text-text-light dark:bg-bg-dark dark:text-text-dark font-sans antialiased transition-colors duration-300;
+  }
+}
+
+@layer components {
+  .gradient-text {
+    @apply bg-gradient-to-br from-primary to-accent bg-clip-text text-transparent;
+  }
+  
+  .glass-panel {
+    @apply bg-white/70 dark:bg-gray-900/70 backdrop-blur-md border border-white/50 dark:border-white/5 shadow-xl;
+  }
+
+  .btn-primary {
+    @apply inline-block bg-gradient-to-br from-primary to-accent text-white px-6 py-3 rounded-full font-semibold shadow-lg hover:-translate-y-0.5 hover:shadow-xl hover:shadow-primary/30 transition-all duration-200;
+  }
+
+  .section-padding {
+    @apply py-24;
+  }
+}
