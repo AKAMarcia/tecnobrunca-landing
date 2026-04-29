@@ -116,9 +116,9 @@ const About = () => {
               <div className="absolute -right-4 -bottom-4 opacity-10 group-hover:scale-110 transition-transform duration-500">
                 <Award size={160} />
               </div>
-              <h3 className="text-2xl font-bold mb-2">Nuestra Misión</h3>
+              <h3 className="text-2xl font-bold mb-2">{t('missionTitle')}</h3>
               <p className="text-white/90 text-lg leading-relaxed max-w-md">
-                Impulsar la transformación digital de empresas mediante soluciones de software innovadoras, escalables y centradas en el usuario.
+                {t('missionDesc')}
               </p>
             </motion.div>
           </div>
